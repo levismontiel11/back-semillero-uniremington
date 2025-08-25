@@ -1,0 +1,28 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: news-service
+          uri: lb://news-service
+          predicates:
+            - Path=/news/**
+        - id: gallery-service
+          uri: lb://gallery-service
+          predicates:
+            - Path=/gallery/**
+        - id: member-service
+          uri: lb://member-service
+          predicates:
+            - Path=/member/**
+        - id: projects-service
+          uri: lb://projects-service
+          predicates:
+            - Path=/projects/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI}
+
+jwt:
+  secret: ${JWT_SECRET}
