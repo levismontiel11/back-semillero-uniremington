@@ -65,7 +65,7 @@ public class MemberServiceTest {
         project.setProjectId(1L);
         project.setTittle("Software Architecture");
         project.setValid(false);
-        project.setResearcherIds(new ArrayList<>());
+        project.setResearchesIds(new ArrayList<>());
 
         news = new News();
         news.setNewId(1L);
@@ -83,7 +83,7 @@ public class MemberServiceTest {
         ProjectRequest request = new ProjectRequest();
         request.setTittle("Software Architecture");
         request.setLeaderId(1L);
-        request.setResearchesIds(List.of(2L));
+        request.setResearcherIds(List.of(2L));
         request.setSlug("sw-arq");
 
         MockMultipartFile image = new MockMultipartFile("img", "test.png", "image/png", "img".getBytes());
@@ -149,7 +149,7 @@ public class MemberServiceTest {
     void addUserToProject() {
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
         memberService.addUserToProject(1L, 5L);
-        assertTrue(project.getResearcherIds().contains(5L));
+        assertTrue(project.getResearchesIds().contains(5L));
         verify(projectRepository).save(project);
     }
 

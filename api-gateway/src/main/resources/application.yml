@@ -10,10 +10,14 @@ spring:
           uri: lb://gallery-service
           predicates:
             - Path=/gallery/**
-        - id: member-service
+        - id: member-service-member
           uri: lb://member-service
           predicates:
             - Path=/member/**
+        - id: member-service-auth
+          uri: lb://member-service
+          predicates:
+            - Path=/auth/**
         - id: projects-service
           uri: lb://projects-service
           predicates:
@@ -23,6 +27,8 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URI}
+      #defaultZone: http://localhost:8761/eureka/
 
 jwt:
   secret: ${JWT_SECRET}
+  #secret: jwtsecretkeyforuniremprojectbackend2025

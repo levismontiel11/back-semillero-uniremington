@@ -48,7 +48,7 @@ public class ProjectServiceTest {
         projectDTO.setProjectId(1L);
         projectDTO.setTittle("Software Architecture");
         projectDTO.setValid(false);
-        projectDTO.setResearchesIds(new ArrayList<>());
+        projectDTO.setResearcherIds(new ArrayList<>());
     }
 
     @Test

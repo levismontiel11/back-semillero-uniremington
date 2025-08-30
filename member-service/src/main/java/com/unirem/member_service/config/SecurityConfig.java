@@ -19,15 +19,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
         http
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.disable())
+                )
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        //.requestMatchers("/member/**").hasRole("MEMBER")
+
                         .anyRequest().permitAll()
                 )
-                //.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(login -> login.disable())
                 .httpBasic(basic -> basic.disable());
 
         return http.build();
     }
 }
+
+

@@ -14,12 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
+
 
 @Service
 public class MemberService {
@@ -38,9 +34,13 @@ public class MemberService {
     @Autowired
     private ModelMapper modelMapper;
 
-    private final String uploadProjectDir = "uploads/projects/";
-    private final String uploadNewsDir = "uploads/news/";
-    private final String uploadGalleryDir = "uploads/gallery/";
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    private static final String PROJECT_IMAGE_DIR = "projects/images";
+    private static final String PROJECT_DOC_DIR   = "projects/docs";
+    private static final String NEWS_IMAGE_DIR = "news/images";
+
 
     public ProjectDTO createProject(ProjectRequest request, MultipartFile image, MultipartFile document) {
         Project project = new Project();
@@ -50,7 +50,8 @@ public class MemberService {
 
         // solo guardamos IDs
         project.setLeaderId(request.getLeaderId());
-        project.setResearcherIds(request.getResearchesIds());
+        project.setResearcherIds(request.getResearcherIds());
+
 
         project.setStatus(request.getStatus());
         project.setCreationDate(request.getCreationDate());
@@ -63,13 +64,19 @@ public class MemberService {
 
 
         if (image != null && !image.isEmpty()) {
-            project.setImageUrl(saveFile(image, uploadProjectDir));
-        }
-        if (document != null && !document.isEmpty()) {
-            project.setDocumentUrl(saveFile(document, uploadProjectDir));
+            project.setImageUrl(fileStorageService.saveFile(image, PROJECT_IMAGE_DIR));
         }
 
-        project = projectRepository.save(project);
+        if (document != null && !document.isEmpty()) {
+            project.setDocumentUrl(fileStorageService.saveFile(document, PROJECT_DOC_DIR));
+        }
+
+        try {
+            project = projectRepository.save(project);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error saving project: " + e.getMessage());
+        }
 
         return projectToProjectDTO(project);
     }
@@ -115,7 +122,7 @@ public class MemberService {
 
         // solo guardamos IDs
         project.setLeaderId(request.getLeaderId());
-        project.setResearcherIds(request.getResearchesIds());
+        project.getResearcherIds().addAll(request.getResearcherIds());
 
         project.setStatus(request.getStatus());
         project.setCreationDate(request.getCreationDate());
@@ -126,10 +133,11 @@ public class MemberService {
         project.setSlug(request.getSlug());
 
         if (image != null && !image.isEmpty()) {
-            project.setImageUrl(saveFile(image, uploadProjectDir));
+            project.setImageUrl(fileStorageService.saveFile(image, PROJECT_IMAGE_DIR));
         }
+
         if (document != null && !document.isEmpty()) {
-            project.setDocumentUrl(saveFile(document, uploadProjectDir));
+            project.setDocumentUrl(fileStorageService.saveFile(document, PROJECT_DOC_DIR));
         }
 
         project = projectRepository.save(project);
@@ -154,7 +162,7 @@ public class MemberService {
         news.setValid(false);
 
         if (image != null && !image.isEmpty()) {
-            news.setImageUrl(saveFile(image, uploadNewsDir));
+            news.setImageUrl(fileStorageService.saveFile(image, NEWS_IMAGE_DIR));
         }
 
         news = newsRepository.save(news);
@@ -196,7 +204,7 @@ public class MemberService {
         news.setSlug(request.getSlug());
 
         if (image != null && !image.isEmpty()) {
-            news.setImageUrl(saveFile(request.getImage(), uploadNewsDir));
+            news.setImageUrl(fileStorageService.saveFile(request.getImage(), NEWS_IMAGE_DIR));
         }
 
         news = newsRepository.save(news);
@@ -215,7 +223,7 @@ public class MemberService {
         galleryImage.setDescription(galleryImageRequest.getDescription());
 
         if (image != null && !image.isEmpty()) {
-            galleryImage.setImageUrl(saveFile(galleryImageRequest.getImage(), uploadNewsDir));
+            galleryImage.setImageUrl(fileStorageService.saveFile(galleryImageRequest.getImage(), ""));
         }
 
         galleryImage = galleryImageRepository.save(galleryImage);
@@ -269,37 +277,6 @@ public class MemberService {
 
     private UserDTO userToUserDTO(User user) {
         return modelMapper.map(user, UserDTO.class);
-    }
-
-    private String saveFile(MultipartFile file, String specificDir) {
-        if (file == null || file.isEmpty()) {
-            return null;
-        }
-
-        try {
-            // Raíz del proyecto (donde está pom.xml)
-            String projectRoot = System.getProperty("user.dir");
-
-            // Carpeta de uploads (ej: /uploads/projects)
-            Path uploadPath = Paths.get(projectRoot, "uploads", specificDir);
-
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            // Nombre único para evitar colisiones
-            String uniqueName = UUID.randomUUID() + "-" + file.getOriginalFilename();
-            Path filePath = uploadPath.resolve(uniqueName);
-
-            // Guardar el archivo en el sistema de archivos
-            file.transferTo(filePath.toFile());
-
-            // Retornamos una ruta relativa (puedes mapearla con un controller para servir archivos)
-            return "/files/" + uniqueName;
-
-        } catch (IOException e) {
-            throw new RuntimeException("Error saving file: " + e.getMessage(), e);
-        }
     }
 
 

@@ -12,11 +12,11 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectRequest {
+public class    ProjectRequest {
     private String tittle;
     private String description;
     private Long leaderId;
-    private List<Long> researchesIds;
+    private List<Long> researcherIds;
     private String status;
     private String creationDate;
     private String endDate;

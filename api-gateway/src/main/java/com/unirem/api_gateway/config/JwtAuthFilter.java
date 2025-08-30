@@ -32,7 +32,7 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
             
             if (path.startsWith("/gallery") ||
             path.startsWith("/news/") || path.startsWith("/projects")
-            || path.startsWith("/member/")) {
+            || path.startsWith("/member")) {
                 return chain.filter(exchange);
             }
 
